@@ -1,0 +1,459 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Minecraft Stronghold Locator</title>
+  <style>
+    :root {
+      --bg: #0a111d;
+      --panel: #121b2b;
+      --panel-2: #182336;
+      --text: #edf3ff;
+      --muted: #a8b5cd;
+      --accent: #ffaf63;
+      --accent-2: #ffc78f;
+      --warn: #ffd382;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg), #070d18);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      padding: max(14px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom));
+    }
+
+    .wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid #26334a;
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .grid-measure,
+    .grid-portal {
+      display: grid;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .grid-measure {
+      grid-template-columns: auto 1fr 1fr 1fr;
+    }
+
+    .grid-portal {
+      grid-template-columns: auto 1fr 1fr;
+    }
+
+    .label-top {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-align: center;
+    }
+
+    .row-tag {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: var(--text);
+      padding-right: 8px;
+      white-space: nowrap;
+    }
+
+    .num-input {
+      width: 100%;
+      font-size: 1.04rem;
+      padding: 10px 11px;
+      border-radius: 10px;
+      border: 1px solid #455776;
+      background: var(--panel-2);
+      color: var(--text);
+      outline: none;
+    }
+
+    .num-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(255, 175, 99, 0.18);
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0 10px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: var(--accent);
+      color: #261507;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .result {
+      background: #101a2a;
+      border-radius: 10px;
+      border: 1px solid #2d3d58;
+      padding: 10px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 0.97rem;
+      font-weight: 700;
+    }
+
+    .error {
+      color: var(--warn);
+      font-weight: 700;
+      margin-top: 8px;
+      min-height: 1.2em;
+      font-size: 0.92rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1>Minecraft Stronghold Locator</h1>
+    </section>
+
+    <section class="card">
+      <h2>Measurements</h2>
+      <div class="grid-measure">
+        <div></div>
+        <div class="label-top">X</div>
+        <div class="label-top">Z</div>
+        <div class="label-top">θ</div>
+
+        <div class="row-tag">A</div>
+        <input id="a_x" class="num-input" type="text" inputmode="text" value="0" aria-label="A_x" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input id="a_z" class="num-input" type="text" inputmode="text" value="0" aria-label="A_z" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input id="theta_a" class="num-input" type="text" inputmode="text" value="-45" aria-label="thetaA" autocapitalize="off" autocorrect="off" spellcheck="false">
+
+        <div class="row-tag">B</div>
+        <input id="b_x" class="num-input" type="text" inputmode="text" value="200" aria-label="B_x" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input id="b_z" class="num-input" type="text" inputmode="text" value="100" aria-label="B_z" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input id="theta_b" class="num-input" type="text" inputmode="text" value="-120" aria-label="thetaB" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <button id="calc_stronghold_btn" type="button">Calculate Stronghold</button>
+      <label class="checkbox">
+        <input id="manual_mode" type="checkbox">
+        Manually Enter Stronghold Coords
+      </label>
+    </section>
+
+    <section id="manual_stronghold_section" class="card" hidden>
+      <h2>Manual Stronghold</h2>
+      <div class="grid-portal">
+        <div></div>
+        <div class="label-top">X</div>
+        <div class="label-top">Z</div>
+
+        <div class="row-tag">Stronghold</div>
+        <input id="manual_s_x" class="num-input" type="text" inputmode="text" aria-label="Manual Stronghold X" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input id="manual_s_z" class="num-input" type="text" inputmode="text" aria-label="Manual Stronghold Z" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <button id="update_manual_btn" type="button">Update</button>
+    </section>
+
+    <section class="card">
+      <h2>Results</h2>
+      <div id="stronghold_result" class="result">Stronghold Location = - , -
+Stronghold Distance = -</div>
+    </section>
+
+    <section class="card">
+      <h2>Nether Travel</h2>
+      <label class="checkbox">
+        <input id="use_a" type="checkbox" checked>
+        Use A as Overworld Portal (default)
+      </label>
+
+      <div class="grid-portal">
+        <div></div>
+        <div class="label-top">X</div>
+        <div class="label-top">Z</div>
+
+        <div class="row-tag">Overworld Portal</div>
+        <input id="portal_ow_x" class="num-input" type="text" inputmode="text" aria-label="Portal Overworld X" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input id="portal_ow_z" class="num-input" type="text" inputmode="text" aria-label="Portal Overworld Z" autocapitalize="off" autocorrect="off" spellcheck="false">
+
+        <div class="row-tag">Nether Portal</div>
+        <input id="portal_n_x" class="num-input" type="text" inputmode="text" value="0" aria-label="Portal Nether X" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input id="portal_n_z" class="num-input" type="text" inputmode="text" value="0" aria-label="Portal Nether Z" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+
+      <button id="calc_nether_btn" type="button">Calculate Target Nether</button>
+      <div id="error" class="error"></div>
+    </section>
+
+    <section class="card">
+      <h2>Results</h2>
+      <div id="nether_result" class="result">Target Nether Portal Location = - , -</div>
+    </section>
+  </main>
+
+  <script>
+    const EPSILON = 1e-9;
+    let lastStronghold = null;
+
+    function yawToDir(thetaDeg) {
+      const thetaRad = thetaDeg * Math.PI / 180;
+      const dx = -Math.sin(thetaRad);
+      const dz = Math.cos(thetaRad);
+      return { dx, dz };
+    }
+
+    function intersectRays(ax, az, adx, adz, bx, bz, bdx, bdz) {
+      const rx = bx - ax;
+      const rz = bz - az;
+      const det = adx * bdz - adz * bdx;
+
+      if (Math.abs(det) < EPSILON) {
+        throw new Error("Lines are nearly parallel. Try measurements farther apart.");
+      }
+
+      const t = (rx * bdz - rz * bdx) / det;
+      const u = (rx * adz - rz * adx) / det;
+      const sx = ax + t * adx;
+      const sz = az + t * adz;
+      return { sx, sz, t, u };
+    }
+
+    function parseNumber(id, label) {
+      const el = document.getElementById(id);
+      const raw = el.value.trim();
+      if (raw === "") {
+        throw new Error(label + " is required.");
+      }
+      const num = Number(raw);
+      if (!Number.isFinite(num)) {
+        throw new Error(label + " must be a number.");
+      }
+      return num;
+    }
+
+    function roundN(n) {
+      return Math.round(n);
+    }
+
+    function computeStrongholdRaw() {
+      const ax = parseNumber("a_x", "A_x");
+      const az = parseNumber("a_z", "A_z");
+      const thetaA = parseNumber("theta_a", "thetaA");
+
+      const bx = parseNumber("b_x", "B_x");
+      const bz = parseNumber("b_z", "B_z");
+      const thetaB = parseNumber("theta_b", "thetaB");
+
+      const { dx: adx, dz: adz } = yawToDir(thetaA);
+      const { dx: bdx, dz: bdz } = yawToDir(thetaB);
+
+      const { sx, sz } = intersectRays(ax, az, adx, adz, bx, bz, bdx, bdz);
+      const distanceB = Math.hypot(sx - bx, sz - bz);
+
+      return { ax, az, bx, bz, sx, sz, distanceB };
+    }
+
+    function setError(msg) {
+      document.getElementById("error").textContent = msg || "";
+    }
+
+    function toggleOWInputs() {
+      const useA = document.getElementById("use_a").checked;
+      const owx = document.getElementById("portal_ow_x");
+      const owz = document.getElementById("portal_ow_z");
+      owx.disabled = useA;
+      owz.disabled = useA;
+
+      if (useA) {
+        owx.value = document.getElementById("a_x").value;
+        owz.value = document.getElementById("a_z").value;
+      }
+    }
+
+    function calculateStronghold() {
+      if (document.getElementById("manual_mode").checked) {
+        updateManualStronghold();
+        return;
+      }
+
+      setError("");
+      try {
+        const { sx, sz, distanceB } = computeStrongholdRaw();
+
+        lastStronghold = { sx, sz };
+        document.getElementById("stronghold_result").textContent =
+          "Stronghold Location = " + roundN(sx) + " , " + roundN(sz) + "\n" +
+          "Stronghold Distance = " + roundN(distanceB);
+      } catch (err) {
+        lastStronghold = null;
+        document.getElementById("stronghold_result").textContent =
+          "Stronghold Location = - , -\nStronghold Distance = -";
+        setError(err.message || String(err));
+      }
+    }
+
+    function toggleManualMode() {
+      const manualMode = document.getElementById("manual_mode").checked;
+      document.getElementById("manual_stronghold_section").hidden = !manualMode;
+
+      const useA = document.getElementById("use_a");
+      const calcStrongholdBtn = document.getElementById("calc_stronghold_btn");
+      if (manualMode) {
+        useA.checked = false;
+        useA.disabled = true;
+        calcStrongholdBtn.disabled = true;
+      } else {
+        useA.disabled = false;
+        calcStrongholdBtn.disabled = false;
+      }
+
+      toggleOWInputs();
+    }
+
+    function updateManualStronghold() {
+      setError("");
+      try {
+        const sx = parseNumber("manual_s_x", "Manual Stronghold X");
+        const sz = parseNumber("manual_s_z", "Manual Stronghold Z");
+
+        lastStronghold = { sx, sz };
+        document.getElementById("stronghold_result").textContent =
+          "Stronghold Location = " + roundN(sx) + " , " + roundN(sz) + "\n" +
+          "Stronghold Distance = N/A";
+      } catch (err) {
+        lastStronghold = null;
+        document.getElementById("stronghold_result").textContent =
+          "Stronghold Location = - , -\nStronghold Distance = -";
+        setError(err.message || String(err));
+      }
+    }
+
+    function calculateNether() {
+      setError("");
+      try {
+        const manualMode = document.getElementById("manual_mode").checked;
+        let ax;
+        let az;
+        let sx;
+        let sz;
+
+        if (manualMode) {
+          if (!lastStronghold) {
+            throw new Error("Enter manual stronghold coords and click Update first.");
+          }
+          sx = lastStronghold.sx;
+          sz = lastStronghold.sz;
+          document.getElementById("stronghold_result").textContent =
+            "Stronghold Location = " + roundN(sx) + " , " + roundN(sz) + "\n" +
+            "Stronghold Distance = N/A";
+        } else {
+          // Recompute from raw inputs to ensure Nether target uses full precision math,
+          // independent of any rounded values shown in the UI.
+          const raw = computeStrongholdRaw();
+          ax = raw.ax;
+          az = raw.az;
+          sx = raw.sx;
+          sz = raw.sz;
+          lastStronghold = { sx, sz };
+
+          document.getElementById("stronghold_result").textContent =
+            "Stronghold Location = " + roundN(sx) + " , " + roundN(sz) + "\n" +
+            "Stronghold Distance = " + roundN(raw.distanceB);
+        }
+
+        const useA = document.getElementById("use_a").checked;
+        let portalOwX;
+        let portalOwZ;
+
+        if (useA) {
+          portalOwX = ax;
+          portalOwZ = az;
+          toggleOWInputs();
+        } else {
+          portalOwX = parseNumber("portal_ow_x", "Portal Overworld X");
+          portalOwZ = parseNumber("portal_ow_z", "Portal Overworld Z");
+        }
+
+        const portalNX = parseNumber("portal_n_x", "Portal Nether X");
+        const portalNZ = parseNumber("portal_n_z", "Portal Nether Z");
+
+        const deltaOwX = sx - portalOwX;
+        const deltaOwZ = sz - portalOwZ;
+        const targetNX = portalNX + (deltaOwX / 8.0);
+        const targetNZ = portalNZ + (deltaOwZ / 8.0);
+
+        document.getElementById("nether_result").textContent =
+          "Target Nether Portal Location = " + roundN(targetNX) + " , " + roundN(targetNZ);
+      } catch (err) {
+        document.getElementById("nether_result").textContent =
+          "Target Nether Portal Location = - , -";
+        setError(err.message || String(err));
+      }
+    }
+
+    document.getElementById("calc_stronghold_btn").addEventListener("click", calculateStronghold);
+    document.getElementById("calc_nether_btn").addEventListener("click", calculateNether);
+    document.getElementById("use_a").addEventListener("change", toggleOWInputs);
+    document.getElementById("manual_mode").addEventListener("change", toggleManualMode);
+    document.getElementById("update_manual_btn").addEventListener("click", updateManualStronghold);
+
+    ["a_x", "a_z"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        if (document.getElementById("use_a").checked) {
+          toggleOWInputs();
+        }
+      });
+    });
+
+    toggleManualMode();
+    toggleOWInputs();
+  </script>
+</body>
+</html>
